@@ -1,6 +1,6 @@
 # House of Legacy ES3 Save File Editor
 - [Click Here!](house-of-legacy-es3.vercel.app)
-A standalone HTML/JavaScript editor for **GameData.es3** save files of *House of Legacy*.  
+- A standalone HTML/JavaScript editor for **GameData.es3** save files of *House of Legacy*.  
 No server required – works entirely in your browser.
 
 ## The References
