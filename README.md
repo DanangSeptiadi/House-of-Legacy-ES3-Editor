@@ -53,7 +53,7 @@
 
 ### f4 / nl Pipe‑format Handling
 
-This fork fixes structural issues with the pipe‑delimited fields (`f4` for members/spouses, `nl` for retainers) that the original editor did not handle correctly:
+This fork fixes structural issues with the pipe‑delimited fields (`f4` for members/spouses, `nl` for retainers) that the original editor did not handle correctly. These fixes are based on analysis of save files from **game version 0.9.03**:
 
 | Entity | Pipe‑count | Fix |
 |--------|-----------|-----|
