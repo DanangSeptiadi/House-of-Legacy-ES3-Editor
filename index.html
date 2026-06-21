@@ -1,115 +1,44 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
-<meta name="google-site-verification" content="4WbeWQVFwSV-y6hO__zWrgfIJmqcKv_gwLFReMgTmTs" />
-<title>House of Legacy · Save Editor (Final)</title>
-<style>
-:root{--bg0:#0a1318;--bg1:#0f1a1f;--bg2:#142128;--bg3:#1a2a2f;--bg4:#1e2e34;--bd:#2e4952;--acc:#c7a25b;--txt:#eef4ff;--mut:#8aa7b5;--grn:#2d6a4f;--red:#6d4c3c;--gld:#b8860b;--blu:#2c5573;}
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-body{background:var(--bg3);font-family:'Segoe UI',Tahoma,sans-serif;padding:16px;color:var(--txt);font-size:14px;}
-.wrap{background:var(--bg1);border-radius:20px;padding:20px 24px 28px;}
-h1{font-size:1.75rem;background:linear-gradient(135deg,#e6c8a0,#c7a25b);-webkit-background-clip:text;background-clip:text;color:transparent;margin-bottom:6px;}
-.sub{color:var(--mut);border-left:3px solid var(--acc);padding-left:12px;margin-bottom:20px;font-size:.85rem;}
-.toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;background:var(--bg4);padding:10px 16px;border-radius:40px;margin-bottom:22px;}
-.badge{background:#2c444c;border-radius:16px;padding:3px 12px;font-size:.75rem;color:var(--mut);}
-button{background:#2c444c;border:none;padding:7px 18px;border-radius:40px;font-weight:600;color:var(--txt);cursor:pointer;transition:background .15s,transform .1s;}
-button:hover{background:#3e6773;transform:translateY(-1px);}
-.btn-primary{background:var(--gld);color:#1e2a2f;}
-.btn-danger{background:var(--red);}
-.btn-add{background:var(--grn);}
-.btn-add:hover{background:#40916c;}
-.btn-max{background:var(--blu);}
-.btn-max:hover{background:#3a70a0;}
-.tabs{display:flex;flex-wrap:wrap;gap:4px;border-bottom:2px solid var(--bd);margin-bottom:18px;}
-.tab{background:var(--bg4);border:none;border-radius:20px 20px 0 0;padding:8px 18px;margin-bottom:-2px;font-weight:500;color:var(--mut);cursor:pointer;}
-.tab.active{background:#2c555f;border-bottom:2px solid var(--acc);color:#ffdfa5;}
-.pane{display:none;}.pane.active{display:block;}
-.card{background:var(--bg2);border-radius:18px;padding:16px;margin-bottom:16px;}
-.row{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px 18px;}
-.field{display:flex;flex-direction:column;gap:5px;}
-.field label{font-size:.68rem;text-transform:uppercase;font-weight:700;color:#aac9d4;letter-spacing:.04em;}
-.field input{background:var(--bg3);border:1px solid #4f6e7a;padding:6px 10px;border-radius:14px;color:var(--txt);}
-.tbl-wrap{overflow-x:auto;max-height:65vh;width:100%;-webkit-overflow-scrolling:touch;}
-table{width:100%;border-collapse:collapse;font-size:.73rem;min-width:800px;}
-th,td{border:1px solid var(--bd);padding:5px 4px;white-space:nowrap;}
-th{background:#1a3a42;position:sticky;top:0;z-index:5;}
-td{background:var(--bg2);}
-.ii{width:100%;min-width:62px;background:#1f3a42;border:1px solid #3c6e7a;border-radius:10px;color:white;padding:3px 6px;}
-.del{padding:3px 10px;background:var(--red);border-radius:12px;cursor:pointer;}
-.del:hover{background:#8b3c2c;transform:none;}
-.empty{color:var(--mut);padding:8px 0;}
-footer{text-align:center;font-size:.68rem;color:#5f8693;margin-top:24px;}
-</style>
-</head>
-<body>
-<div class="wrap">
-<h1>🏮 House of Legacy · Save Editor (Final)</h1>
-<div class="sub">Spouse auto‑max uses safe indexes. No events/duties modified.</div>
-<div class="toolbar">
-<input type="file" id="fileInput" accept=".es3,.json" hidden>
-<button onclick="document.getElementById('fileInput').click()">📂 Open GameData.es3</button>
-<button class="btn-primary" onclick="doSave()">💾 Save Archive</button>
-<button class="btn-danger" onclick="location.reload()">⟳ Reset</button>
-<span class="badge" id="status">No save loaded</span>
-</div>
-<div class="tabs" id="tabs"></div>
-<div id="panels"></div>
-<footer>Items 0‑285. Add Spouse uses organic template. Auto‑max spouse = age21, stats100, relation100, luck100, talentVal100.</footer>
-</div>
-<script>
-let S=null,fileName='GameData.es3';
-const $=id=>document.getElementById(id);
-const esc=s=>String(s).replace(/[&<>]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[m]));
-const clampStr=(v,lo,hi)=>{let n=Number(v);if(isNaN(n))n=lo;return String(Math.min(hi,Math.max(lo,n)));};
-const randId=()=>'M'+(Math.random()*1e17|0)+Date.now().toString().slice(-6);
-const defaultPortrait='4|23|1|10';
-const getPipe=(str,i,def='')=>{const p=(str||'').split('|');return i<p.length?p[i]:def;};
-const setPipe=(str,i,val)=>{const p=(str||'').split('|');while(p.length<=i)p.push('');p[i]=val;return p.join('|');};
-function setStatus(msg,ok=true){const el=$('status');el.textContent=msg;el.style.background=ok?'#2c5a4a':'#8b3c2c';setTimeout(()=>el.style.background='#2c444c',2000);}
-const MI={id:0,f4:4,age:6,lit:7,mar:8,com:9,art:10,mood:11,examTitle:13,rep:16,charm:20,cunning:27,stamina:30,health:31,skillVal:33,school:40};
-const SI={id:0,portrait:1,f4:2,childIds:3,field4extra:4,age:5,lit:6,mar:7,com:8,art:9,mood:10,rep:12,charm:15,health:16,stamina:20,cunning:19,skillVal:23,pregnancy:18,fertility:25,specialTag:27,relation:31};
-const RI={id:0,portrait:1,nl:2,age:3,lit:4,mar:5,com:6,art:7,mood:8,rep:11,charm:13,health:14,cunning:15,fee:18,stamina:19,pregnancy:17,specialTag:21};
-const OPT={talent:{"0":"None","1":"📖 Writing","2":"⚔️ Might","3":"💰 Business","4":"🎨 Art"},skill:{"0":"None","1":"🔮 Sorcery","2":"💊 Medicine","3":"☯️ Daoism","4":"🔮 Divination","5":"💋 Charisma","6":"⚙️ Technology"},hobby:{"0":"Rouge","1":"Ink","2":"Art","3":"Antique","4":"Tea Set","5":"Incense","6":"Vase","7":"Wine","8":"Music","9":"Pelt"},exam:{"0":"None","1":"Xiucai","2":"Juren","3":"Xieyuan","4":"Gongshi","5":"Huiyuan","6":"Jinshi","7":"Tanhua","8":"Bangyan","9":"Zhuangyuan"},school:{"0":"None","1":"Mingli","2":"Jiuyuan","3":"Jinwen"},horse:{"0":"Red","1":"Red/White","2":"Blue","3":"Blue/White","4":"White","5":"White/Brown","6":"Gold","7":"Gold/White","8":"Black","9":"Black/White"},gender:{"0":"Female","1":"Male"}};
-const parseF4=str=>({name:getPipe(str,0,'Unknown'),gen:getPipe(str,1,'0'),talentType:getPipe(str,2,'1'),talentVal:getPipe(str,3,'0'),gender:getPipe(str,4,'0'),lifespan:getPipe(str,5,'80'),skillType:getPipe(str,6,'1'),luck:getPipe(str,7,'50'),unk:getPipe(str,8,''),hobby:getPipe(str,9,'0')});
-const buildF4=o=>`${o.name}|${o.gen}|${o.talentType}|${o.talentVal}|${o.gender}|${o.lifespan}|${o.skillType}|${o.luck}|${o.unk}|${o.hobby}`;
-const buildF4R=o=>`${o.name}|0|${o.talentType}|${o.talentVal}|${o.gender}|80|${o.skillType}|${o.luck}|1|0|null`;
-const td=(val,t,i,f,type='text')=>`<td><input class="ii" type="${type}" data-t="${t}" data-i="${i}" data-f="${f}" value="${esc(val)}"></td>`;
-const tds=(opts,cur,t,i,f)=>`<td><select class="ii" data-t="${t}" data-i="${i}" data-f="${f}">${Object.entries(opts).map(([k,v])=>`<option value="${k}"${cur==k?' selected':''}>${v}</option>`).join('')}</select></td>`;
-const del=(t,i)=>`<td><button class="del" data-t="${t}" data-i="${i}">🗑️</button></td>`;
-function renderTable(cid,heads,rows,rowFn){const c=$(cid);if(!rows?.length){c.innerHTML='<p class="empty">No data. Load a save or add entries above.</p>';return;}c.innerHTML=`<div class="tbl-wrap"><table><thead><tr>${heads.map(h=>`<th>${h}</th>`).join('')}<th></th></tr></thead><tbody>${rows.map((r,i)=>`<tr>${rowFn(r,i)}</td>`).join('')}</tbody></table></div>`;}
-function renderGameData(){if(!S)return;const cg=S.CGNum?.value||['0','0'],fam=S.FamilyData?.value||['','Yu','1','0'],tm=S.Time_now?.value||[1,1,7];$('gameForm').innerHTML=[['💰 Gold','number','gold',String(cg[0]||'0')],['💎 Ingots','number','ingot',String(cg[1]||'0')],['🏠 Family Name','text','fname',fam[1]||'Yu'],['📈 Family Level','number','flevel',String(fam[2]||'1')],['⭐ Reputation','number','frep',String(fam[3]||'0')],['📅 Year','number','year',tm[2]],['🌙 Month','number','month',tm[1]],['☀️ Day','number','day',tm[0]]].map(([label,type,id,val])=>`<div class="field"><label>${label}</label><input type="${type}" id="g_${id}" value="${esc(val)}"></div>`).join('');}
-function renderMembers(){renderTable('memberTbl',['ID','Name','Gender','Age','HP','Mood','Stam','Renown','Charm','Luck','Lit','Mar','Com','Art','Cun','Exam','School','Talent','TalVal','Skill','SkVal','Hobby'],S?.Member_now?.value,(m,i)=>{const f=parseF4(m[MI.f4]),t='member';return `${td(m[MI.id],t,i,'id')}${td(f.name,t,i,'name')}${tds(OPT.gender,f.gender,t,i,'gender')}${td(m[MI.age]||'21',t,i,'age','number')}${td(m[MI.health]||'100',t,i,'health','number')}${td(m[MI.mood]||'80',t,i,'mood','number')}${td(m[MI.stamina]||'100',t,i,'stamina','number')}${td(m[MI.rep]||'0',t,i,'rep','number')}${td(m[MI.charm]||'0',t,i,'charm','number')}${td(f.luck,t,i,'luck','number')}${td(m[MI.lit]||'0',t,i,'lit','number')}${td(m[MI.mar]||'0',t,i,'mar','number')}${td(m[MI.com]||'0',t,i,'com','number')}${td(m[MI.art]||'0',t,i,'art','number')}${td(m[MI.cunning]||'0',t,i,'cunning','number')}${tds(OPT.exam,m[MI.examTitle]||'0',t,i,'examTitle')}${tds(OPT.school,m[MI.school]||'0',t,i,'school')}${tds(OPT.talent,f.talentType,t,i,'talentType')}${td(f.talentVal,t,i,'talentVal','number')}${tds(OPT.skill,f.skillType,t,i,'skillType')}${td(m[MI.skillVal]||'0',t,i,'skillVal','number')}${tds(OPT.hobby,f.hobby,t,i,'hobby')}${del(t,i)}`;});}
-function renderSpouses(){renderTable('spouseTbl',['ID','Portrait','Name','Partner','Age','Health','Stamina','Mood','Renown','Charm','Luck','Lit','Mar','Com','Art','Cunning','SkVal','Relation','Hobby','Talent','TalVal','Skill'],S?.Member_qu?.value,(s,i)=>{const f=parseF4(s[SI.f4]),t='spouse';return `${td(s[SI.id],t,i,'id')}${td(s[SI.portrait]||defaultPortrait,t,i,'portrait')}${td(f.name,t,i,'name')}${td(getPipe(s[SI.f4],9),t,i,'partnerId')}${td(s[SI.age]||'18',t,i,'age','number')}${td(s[SI.health]||'100',t,i,'health','number')}${td(s[SI.stamina]||'100',t,i,'stamina','number')}${td(s[SI.mood]||'80',t,i,'mood','number')}${td(s[SI.rep]||'0',t,i,'rep','number')}${td(s[SI.charm]||'0',t,i,'charm','number')}${td(f.luck,t,i,'luck','number')}${td(s[SI.lit]||'0',t,i,'lit','number')}${td(s[SI.mar]||'0',t,i,'mar','number')}${td(s[SI.com]||'0',t,i,'com','number')}${td(s[SI.art]||'0',t,i,'art','number')}${td(s[SI.cunning]||'0',t,i,'cunning','number')}${td(s[SI.skillVal]||'0',t,i,'skillVal','number')}${td(s[SI.relation]||'0',t,i,'relation','number')}${tds(OPT.hobby,f.hobby,t,i,'hobby')}${tds(OPT.talent,f.talentType,t,i,'talentType')}${td(f.talentVal,t,i,'talentVal','number')}${tds(OPT.skill,f.skillType,t,i,'skillType')}${del(t,i)}`;});}
-function renderRetainers(){renderTable('retainerTbl',['ID','Portrait','Name','Gender','Age','HP','Stam','Mood','Renown','Charm','Luck','Lit','Mar','Com','Art','Cun','Fee','Talent','TalVal','Skill','SpecialTag'],S?.MenKe_Now?.value,(r,i)=>{const f=parseF4(r[RI.nl]),t='retainer';return `${td(r[RI.id],t,i,'id')}${td(r[RI.portrait]||defaultPortrait,t,i,'portrait')}${td(f.name,t,i,'name')}${tds(OPT.gender,f.gender,t,i,'gender')}${td(r[RI.age]||'21',t,i,'age','number')}${td(r[RI.health]||'100',t,i,'health','number')}${td(r[RI.stamina]||'100',t,i,'stamina','number')}${td(r[RI.mood]||'50',t,i,'mood','number')}${td(r[RI.rep]||'0',t,i,'rep','number')}${td(r[RI.charm]||'0',t,i,'charm','number')}${td(f.luck,t,i,'luck','number')}${td(r[RI.lit]||'0',t,i,'lit','number')}${td(r[RI.mar]||'0',t,i,'mar','number')}${td(r[RI.com]||'0',t,i,'com','number')}${td(r[RI.art]||'0',t,i,'art','number')}${td(r[RI.cunning]||'0',t,i,'cunning','number')}${td(r[RI.fee]||'0',t,i,'fee','number')}${tds(OPT.talent,f.talentType,t,i,'talentType')}${td(f.talentVal,t,i,'talentVal','number')}${tds(OPT.skill,f.skillType,t,i,'skillType')}${td(r[RI.specialTag]||'',t,i,'specialTag')}${del(t,i)}`;});}
-function renderHorses(){renderTable('horseTbl',['Color','Age','Lifespan','Power','Speed','Smart','Owner'],S?.Horse_Have?.value,(h,i)=>{while(h.length<7)h.push('0');const t='horse';return `${tds(OPT.horse,h[0],t,i,'0')}${td(h[1],t,i,'1','number')}${td(h[2],t,i,'2','number')}${td(h[3],t,i,'3','number')}${td(h[4],t,i,'4','number')}${td(h[5],t,i,'5','number')}${td(h[6],t,i,'6')}${del(t,i)}`;});}
-function renderInventory(){renderTable('inventoryTbl',['Item ID','Quantity'],S?.Prop_have?.value,(item,i)=>`${td(item[0],'inv',i,'0','number')}${td(item[1],'inv',i,'1','number')}${del('inv',i)}`);}
-function normalizeData(){if(!S)return;if(S.Member_now?.value){S.Member_now.value.forEach(m=>{if(m[MI.examTitle]!==undefined&&typeof m[MI.examTitle]!=='string')m[MI.examTitle]=String(m[MI.examTitle]);if(m[MI.school]!==undefined&&typeof m[MI.school]!=='string')m[MI.school]=String(m[MI.school]);});}}
-const PIPE_FIELDS=new Set(['name','luck','talentType','talentVal','skillType','hobby','gender']);
-const RAW={member:{age:[MI.age,0,120],health:[MI.health,0,100],mood:[MI.mood,0,100],stamina:[MI.stamina,0,100],rep:[MI.rep,0,100],charm:[MI.charm,0,100],lit:[MI.lit,0,100],mar:[MI.mar,0,100],com:[MI.com,0,100],art:[MI.art,0,100],cunning:[MI.cunning,0,100],skillVal:[MI.skillVal,0,100],examTitle:[MI.examTitle,0,9],school:[MI.school,0,3]},spouse:{age:[SI.age,0,120],health:[SI.health,0,100],stamina:[SI.stamina,0,100],mood:[SI.mood,0,100],rep:[SI.rep,0,100],charm:[SI.charm,0,100],lit:[SI.lit,0,100],mar:[SI.mar,0,100],com:[SI.com,0,100],art:[SI.art,0,100],cunning:[SI.cunning,0,100],skillVal:[SI.skillVal,0,100],relation:[SI.relation,0,100]},retainer:{age:[RI.age,0,120],health:[RI.health,0,100],stamina:[RI.stamina,0,100],mood:[RI.mood,0,100],rep:[RI.rep,0,100],charm:[RI.charm,0,100],lit:[RI.lit,0,100],mar:[RI.mar,0,100],com:[RI.com,0,100],art:[RI.art,0,100],cunning:[RI.cunning,0,100],fee:[RI.fee,0,999999]}};
-const F4_KEY={member:MI.f4,spouse:SI.f4,retainer:RI.nl};const isRet=t=>t==='retainer';
-const DEL_KEY={member:'Member_now',spouse:'Member_qu',retainer:'MenKe_Now',horse:'Horse_Have',inv:'Prop_have'};
-const RENDERS={member:renderMembers,spouse:renderSpouses,retainer:renderRetainers,horse:renderHorses,inv:renderInventory};
-function applyField(row,type,field,rawVal){const fk=F4_KEY[type];if(PIPE_FIELDS.has(field)&&fk!==undefined){let f=parseF4(row[fk]);if(field==='name')f.name=rawVal;else if(field==='luck')f.luck=clampStr(rawVal,0,100);else if(field==='talentType')f.talentType=rawVal;else if(field==='talentVal')f.talentVal=clampStr(rawVal,0,100);else if(field==='skillType')f.skillType=rawVal;else if(field==='hobby')f.hobby=rawVal;else if(field==='gender')f.gender=rawVal;row[fk]=isRet(type)?buildF4R(f):buildF4(f);return;}if(field==='partnerId'){row[fk]=setPipe(row[fk],9,rawVal);return;}if(field==='specialTag'){if(type==='spouse')row[SI.specialTag]=rawVal;else if(type==='retainer')row[RI.specialTag]=rawVal;return;}const spec=RAW[type]?.[field];if(spec){const[idx,lo,hi]=spec;row[idx]=clampStr(rawVal,lo,hi);return;}if(type==='horse'||type==='inv'){row[+field]=rawVal;}}
-document.addEventListener('change',e=>{const t=e.target.dataset.t,i=e.target.dataset.i,f=e.target.dataset.f;if(!t||i===undefined||!f||!S)return;const src=DEL_KEY[t];if(src&&S[src]?.value[+i])applyField(S[src].value[+i],t,f,e.target.value);});
-document.addEventListener('click',e=>{const btn=e.target.closest('.del');if(!btn||!S)return;const{t,i}=btn.dataset;S[DEL_KEY[t]]?.value.splice(+i,1);RENDERS[t]?.();});
-function autoMaxGame(){if(!S)return;if(!S.CGNum)S.CGNum={value:['0','0','0','0']};S.CGNum.value[0]='999999999';S.CGNum.value[1]='999999';if(S.FamilyData?.value){S.FamilyData.value[2]='80';S.FamilyData.value[3]='1600';}renderGameData();}
-function autoMax(type){if(!S)return;const STATS_100=['lit','mar','com','art','cunning','rep','health','stamina','mood','charm'];if(type==='member'&&S.Member_now){S.Member_now.value.forEach(m=>{STATS_100.forEach(k=>m[MI[k]]='100');m[MI.age]='21';m[MI.skillVal]='100';m[MI.examTitle]='9';m[MI.school]='3';const f=parseF4(m[MI.f4]);f.luck='100';f.talentVal='100';m[MI.f4]=buildF4(f);});renderMembers();}
-if(type==='spouse'&&S.Member_qu){S.Member_qu.value.forEach(s=>{STATS_100.forEach(k=>s[SI[k]]='100');s[SI.age]='21';s[SI.skillVal]='100';s[SI.relation]='100';s[SI.f4]=setPipe(setPipe(s[SI.f4]||'',7,'100'),3,'100');});renderSpouses();}
-if(type==='retainer'&&S.MenKe_Now){S.MenKe_Now.value.forEach(r=>{STATS_100.forEach(k=>r[RI[k]]='100');r[RI.age]='21';r[RI.charm]='100';r[RI.fee]='0';const f=parseF4(r[RI.nl]);f.luck='100';f.talentVal='100';r[RI.nl]=buildF4R(f);});renderRetainers();}
-if(type==='horse'&&S.Horse_Have){S.Horse_Have.value=S.Horse_Have.value.map(h=>{while(h.length<7)h.push('0');return[h[0]||'6','5','25','99','99','99',h[6]||'null'];});renderHorses();}}
-function addRetainer(){if(!S.MenKe_Now)S.MenKe_Now={value:[]};const r=new Array(22).fill('');r[RI.id]=randId();r[RI.portrait]=defaultPortrait;r[RI.nl]='New Retainer|0|0|50|1|80|0|50|1|0|null';r[RI.age]='21';r[RI.health]='100';r[RI.stamina]='100';r[RI.mood]='50';[RI.rep,RI.charm,RI.lit,RI.mar,RI.com,RI.art,RI.cunning].forEach(i=>r[i]='50');r[RI.fee]='0';r[RI.specialTag]='';r[RI.pregnancy]='-1';S.MenKe_Now.value.push(r);renderRetainers();}
-function addHorse(){if(!S.Horse_Have)S.Horse_Have={value:[]};S.Horse_Have.value.push(['6','3','25','50','50','50','null']);renderHorses();}
-function addAllItems(){S.Prop_have={__type:"System.Collections.Generic.List`1[[System.Collections.Generic.List`1[[System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089]], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089]],mscorlib",value:[]};for(let id=0;id<=285;id++){S.Prop_have.value.push([String(id),'999999']);}renderInventory();setStatus('Added all items 0-285 quantity 999,999.');}
-function addItem(){if(!S.Prop_have){S.Prop_have={__type:"System.Collections.Generic.List`1[[System.Collections.Generic.List`1[[System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089]], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089]],mscorlib",value:[]};}S.Prop_have.value.push(['0','1']);renderInventory();}
-document.getElementById('fileInput').onchange=e=>{const file=e.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=ev=>{try{S=JSON.parse(ev.target.result);fileName=file.name;normalizeData();setStatus(`Loaded: ${file.name}`);renderAll();}catch(err){setStatus('Invalid JSON: '+err.message,false);}};reader.readAsText(file);};
-function flushGameData(){if(!S)return;if(!S.CGNum)S.CGNum={value:['0','0','0','0']};const gold=Number($('g_gold')?.value);const ingot=Number($('g_ingot')?.value);S.CGNum.value[0]=isNaN(gold)?'0':String(gold);S.CGNum.value[1]=isNaN(ingot)?'0':String(ingot);const fam=S.FamilyData?.value;if(fam){fam[1]=$('g_fname')?.value||fam[1]||'Yu';fam[2]=String(Number($('g_flevel')?.value)||1);fam[3]=String(Number($('g_frep')?.value)||0);}const tm=S.Time_now?.value;if(tm){tm[2]=Number($('g_year')?.value)||0;tm[1]=Number($('g_month')?.value)||0;tm[0]=Number($('g_day')?.value)||0;}}
-function doSave(){if(!S){setStatus('No save loaded',false);return;}flushGameData();normalizeData();const blob=new Blob([JSON.stringify(S,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=fileName;a.click();URL.revokeObjectURL(a.href);setStatus('Saved.');}
-const TABS=[{id:'game',label:'📊 Game Data',html:`<div class="card"><div class="grid" id="gameForm"></div><div class="row" style="margin-top:14px"><button class="btn-max" onclick="autoMaxGame()">✨ Max Money / Reputation / Level</button></div></div>`},{id:'member',label:'👥 Members',html:`<div class="card"><div class="row"><button class="btn-max" onclick="autoMax('member')">⚡ Max all stats (age 21, all 100)</button></div><div id="memberTbl"></div></div>`},{id:'spouse',label:'💍 Spouses',html:`<div class="card"><div class="row"><button class="btn-max" onclick="autoMax('spouse')">⚡ Max all spouse stats</button></div><div id="spouseTbl"></div></div>`},{id:'retainer',label:'🗡️ Retainers',html:`<div class="card"><div class="row"><button class="btn-max" onclick="autoMax('retainer')">⚡ Max retainers + zero fee</button><button class="btn-add" onclick="addRetainer()">📜 Add Retainer</button></div><div id="retainerTbl"></div></div>`},{id:'inventory',label:'📦 Inventory',html:`<div class="card"><div class="row"><button class="btn-add" onclick="addAllItems()">📦 Add ALL Items (0-285, 999,999 each)</button><button class="btn-add" onclick="addItem()">➕ Add Custom Slot</button></div><div id="inventoryTbl"></div></div>`},{id:'horse',label:'🐎 Horses',html:`<div class="card"><div class="row"><button class="btn-add" onclick="addHorse()">🐴 Add Horse</button><button class="btn-max" onclick="autoMax('horse')">⚡ Max all horses (age 5, stats 99)</button></div><div id="horseTbl"></div></div>`}];
-(function initLayout(){const tabsEl=$('tabs'),panelsEl=$('panels');TABS.forEach(({id,label,html},i)=>{const btn=Object.assign(document.createElement('button'),{className:'tab'+(i?'':' active'),textContent:label});btn.dataset.tab=id;tabsEl.appendChild(btn);const pane=Object.assign(document.createElement('div'),{id:id+'-pane',className:'pane'+(i?'':' active'),innerHTML:html});panelsEl.appendChild(pane);});tabsEl.addEventListener('click',e=>{const btn=e.target.closest('.tab');if(!btn)return;document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));document.querySelectorAll('.pane').forEach(p=>p.classList.remove('active'));btn.classList.add('active');$(btn.dataset.tab+'-pane').classList.add('active');});})();
-function renderAll(){renderGameData();renderMembers();renderSpouses();renderRetainers();renderInventory();renderHorses();}
-</script>
-</body>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+        <meta
+            name="google-site-verification"
+            content="4WbeWQVFwSV-y6hO__zWrgfIJmqcKv_gwLFReMgTmTs"
+        />
+        <title>House of Legacy · Save Editor (Final)</title>
+        <link rel="stylesheet" href="style.css" />
+    </head>
+    <body>
+        <div class="wrap">
+            <h1>🏮 House of Legacy · Save Editor (Final)</h1>
+            <div class="sub">
+                Spouse auto‑max uses safe indexes. No events/duties modified.
+            </div>
+            <div class="toolbar">
+                <input type="file" id="fileInput" accept=".es3,.json" hidden />
+                <button onclick="document.getElementById('fileInput').click()">
+                    📂 Open GameData.es3
+                </button>
+                <button class="btn-primary" onclick="doSave()">
+                    💾 Save Archive
+                </button>
+                <button class="btn-danger" onclick="location.reload()">
+                    ⟳ Reset
+                </button>
+                <span class="badge" id="status">No save loaded</span>
+            </div>
+            <div class="tabs" id="tabs"></div>
+            <div id="panels"></div>
+            <footer>
+                Items 0‑285. Add Spouse uses organic template. Auto‑max spouse =
+                age21, stats100, relation100, luck100, talentVal100.
+            </footer>
+        </div>
+        <script src="js/config.js"></script>
+        <script src="js/utils.js"></script>
+        <script src="js/rendering.js"></script>
+        <script src="js/editor.js"></script>
+    </body>
 </html>
