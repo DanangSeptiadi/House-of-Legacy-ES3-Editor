@@ -1,0 +1,69 @@
+// ── Field index maps ────────────────────────────────────────────
+const MI={
+  id:0,f4:4,age:6,lit:7,mar:8,com:9,art:10,mood:11,
+  examTitle:13,rep:16,charm:20,cunning:27,stamina:30,
+  health:31,skillVal:33,school:40
+};
+const SI={
+  id:0,portrait:1,f4:2,childIds:3,field4extra:4,age:5,
+  lit:6,mar:7,com:8,art:9,mood:10,rep:12,charm:15,
+  health:16,stamina:20,cunning:19,skillVal:23,pregnancy:18,
+  fertility:25,specialTag:27,relation:31
+};
+const RI={
+  id:0,portrait:1,nl:2,age:3,lit:4,mar:5,com:6,art:7,
+  mood:8,rep:11,charm:13,health:14,cunning:15,fee:18,
+  stamina:19,pregnancy:17,specialTag:21
+};
+
+// ── Option dropdown maps ────────────────────────────────────────
+const OPT={
+  talent:{"0":"None","1":"📖 Writing","2":"⚔️ Might","3":"💰 Business","4":"🎨 Art"},
+  skill:{"0":"None","1":"🔮 Sorcery","2":"💊 Medicine","3":"☯️ Daoism","4":"🔮 Divination","5":"💋 Charisma","6":"⚙️ Technology"},
+  hobby:{"0":"Rouge","1":"Ink","2":"Art","3":"Antique","4":"Tea Set","5":"Incense","6":"Vase","7":"Wine","8":"Music","9":"Pelt"},
+  exam:{"0":"None","1":"Xiucai","2":"Juren","3":"Xieyuan","4":"Gongshi","5":"Huiyuan","6":"Jinshi","7":"Tanhua","8":"Bangyan","9":"Zhuangyuan"},
+  school:{"0":"None","1":"Mingli","2":"Jiuyuan","3":"Jinwen"},
+  horse:{"0":"Red","1":"Red/White","2":"Blue","3":"Blue/White","4":"White","5":"White/Brown","6":"Gold","7":"Gold/White","8":"Black","9":"Black/White"},
+  gender:{"0":"Female","1":"Male"}
+};
+
+// ── Field metadata ──────────────────────────────────────────────
+const PIPE_FIELDS=new Set(['name','luck','talentType','talentVal','skillType','hobby','gender']);
+
+const RAW={
+  member:{
+    age:[MI.age,0,120],health:[MI.health,0,100],mood:[MI.mood,0,100],
+    stamina:[MI.stamina,0,100],rep:[MI.rep,0,100],charm:[MI.charm,0,100],
+    lit:[MI.lit,0,100],mar:[MI.mar,0,100],com:[MI.com,0,100],
+    art:[MI.art,0,100],cunning:[MI.cunning,0,100],skillVal:[MI.skillVal,0,100],
+    examTitle:[MI.examTitle,0,9],school:[MI.school,0,3]
+  },
+  spouse:{
+    age:[SI.age,0,120],health:[SI.health,0,100],stamina:[SI.stamina,0,100],
+    mood:[SI.mood,0,100],rep:[SI.rep,0,100],charm:[SI.charm,0,100],
+    lit:[SI.lit,0,100],mar:[SI.mar,0,100],com:[SI.com,0,100],
+    art:[SI.art,0,100],cunning:[SI.cunning,0,100],skillVal:[SI.skillVal,0,100],
+    relation:[SI.relation,0,100]
+  },
+  retainer:{
+    age:[RI.age,0,120],health:[RI.health,0,100],stamina:[RI.stamina,0,100],
+    mood:[RI.mood,0,100],rep:[RI.rep,0,100],charm:[RI.charm,0,100],
+    lit:[RI.lit,0,100],mar:[RI.mar,0,100],com:[RI.com,0,100],
+    art:[RI.art,0,100],cunning:[RI.cunning,0,100],fee:[RI.fee,0,999999]
+  }
+};
+
+// ── Key / dispatch maps ─────────────────────────────────────────
+const F4_KEY={member:MI.f4,spouse:SI.f4,retainer:RI.nl};
+const isRet=t=>t==='retainer';
+const DEL_KEY={member:'Member_now',spouse:'Member_qu',retainer:'MenKe_Now',horse:'Horse_Have',inv:'Prop_have'};
+
+// ── Tab definitions ─────────────────────────────────────────────
+const TABS=[
+  {id:'game',label:'📊 Game Data',html:`<div class="card"><div class="grid" id="gameForm"></div><div class="row" style="margin-top:14px"><button class="btn-max" onclick="autoMaxGame()">✨ Max Money / Reputation / Level</button></div></div>`},
+  {id:'member',label:'👥 Members',html:`<div class="card"><div class="row"><button class="btn-max" onclick="autoMax('member')">⚡ Max all stats (age 21, all 100)</button></div><div id="memberTbl"></div></div>`},
+  {id:'spouse',label:'💍 Spouses',html:`<div class="card"><div class="row"><button class="btn-max" onclick="autoMax('spouse')">⚡ Max all spouse stats</button></div><div id="spouseTbl"></div></div>`},
+  {id:'retainer',label:'🗡️ Retainers',html:`<div class="card"><div class="row"><button class="btn-max" onclick="autoMax('retainer')">⚡ Max retainers + zero fee</button><button class="btn-add" onclick="addRetainer()">📜 Add Retainer</button></div><div id="retainerTbl"></div></div>`},
+  {id:'inventory',label:'📦 Inventory',html:`<div class="card"><div class="row"><button class="btn-add" onclick="addAllItems()">📦 Add ALL Items (0-285, 999,999 each)</button><button class="btn-add" onclick="addItem()">➕ Add Custom Slot</button></div><div id="inventoryTbl"></div></div>`},
+  {id:'horse',label:'🐎 Horses',html:`<div class="card"><div class="row"><button class="btn-add" onclick="addHorse()">🐴 Add Horse</button><button class="btn-max" onclick="autoMax('horse')">⚡ Max all horses (age 5, stats 99)</button></div><div id="horseTbl"></div></div>`}
+];

@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+        <meta
+            name="google-site-verification"
+            content="4WbeWQVFwSV-y6hO__zWrgfIJmqcKv_gwLFReMgTmTs"
+        />
+        <title>House of Legacy · Save Editor (Final)</title>
+        <link rel="stylesheet" href="style.css" />
+    </head>
+    <body>
+        <div class="wrap">
+            <h1>🏮 House of Legacy · Save Editor (Final)</h1>
+            <div class="sub">
+                Spouse auto‑max uses safe indexes. No events/duties modified.
+            </div>
+            <div class="toolbar">
+                <input type="file" id="fileInput" accept=".es3,.json" hidden />
+                <button onclick="document.getElementById('fileInput').click()">
+                    📂 Open GameData.es3
+                </button>
+                <button class="btn-primary" onclick="doSave()">
+                    💾 Save Archive
+                </button>
+                <button class="btn-danger" onclick="location.reload()">
+                    ⟳ Reset
+                </button>
+                <span class="badge" id="status">No save loaded</span>
+            </div>
+            <div class="tabs" id="tabs"></div>
+            <div id="panels"></div>
+            <footer>
+                Items 0‑285. Add Spouse uses organic template. Auto‑max spouse =
+                age21, stats100, relation100, luck100, talentVal100.
+            </footer>
+        </div>
+        <script src="js/config.js"></script>
+        <script src="js/utils.js"></script>
+        <script src="js/rendering.js"></script>
+        <script src="js/editor.js"></script>
+    </body>
+</html>
