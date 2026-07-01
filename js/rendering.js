@@ -92,6 +92,7 @@ function renderSpouses() {
       "Cunning",
       "SkVal",
       "Relation",
+      "Infertile",
       "Hobby",
       "Talent",
       "TalVal",
@@ -101,7 +102,7 @@ function renderSpouses() {
     (s, i) => {
       const f = parseF4_S(s[SI.f4]),
         t = "spouse";
-      return `${td(s[SI.id], t, i, "id")}${td(s[SI.portrait] || defaultPortrait, t, i, "portrait")}${td(f.name, t, i, "name")}${td(f.partnerId, t, i, "partnerId")}${td(s[SI.age] || "18", t, i, "age", "number")}${td(s[SI.health] || "100", t, i, "health", "number")}${td(s[SI.stamina] || "100", t, i, "stamina", "number")}${td(s[SI.mood] || "80", t, i, "mood", "number")}${td(s[SI.rep] || "0", t, i, "rep", "number")}${td(s[SI.charm] || "0", t, i, "charm", "number")}${td(f.luck, t, i, "luck", "number")}${td(s[SI.lit] || "0", t, i, "lit", "number")}${td(s[SI.mar] || "0", t, i, "mar", "number")}${td(s[SI.com] || "0", t, i, "com", "number")}${td(s[SI.art] || "0", t, i, "art", "number")}${td(s[SI.cunning] || "0", t, i, "cunning", "number")}${td(s[SI.skillVal] || "0", t, i, "skillVal", "number")}${td(s[SI.relation] || "0", t, i, "relation", "number")}${tds(OPT.hobby, f.hobby, t, i, "hobby")}${tds(OPT.talent, f.talentType, t, i, "talentType")}${td(f.talentVal, t, i, "talentVal", "number")}${tds(OPT.skill, f.skillType, t, i, "skillType")}${del(t, i)}`;
+      return `${td(s[SI.id], t, i, "id")}${td(s[SI.portrait] || defaultPortrait, t, i, "portrait")}${td(f.name, t, i, "name")}${td(f.partnerId, t, i, "partnerId")}${td(s[SI.age] || "18", t, i, "age", "number")}${td(s[SI.health] || "100", t, i, "health", "number")}${td(s[SI.stamina] || "100", t, i, "stamina", "number")}${td(s[SI.mood] || "80", t, i, "mood", "number")}${td(s[SI.rep] || "0", t, i, "rep", "number")}${td(s[SI.charm] || "0", t, i, "charm", "number")}${td(f.luck, t, i, "luck", "number")}${td(s[SI.lit] || "0", t, i, "lit", "number")}${td(s[SI.mar] || "0", t, i, "mar", "number")}${td(s[SI.com] || "0", t, i, "com", "number")}${td(s[SI.art] || "0", t, i, "art", "number")}${td(s[SI.cunning] || "0", t, i, "cunning", "number")}${td(s[SI.skillVal] || "0", t, i, "skillVal", "number")}${td(s[SI.relation] || "0", t, i, "relation", "number")}${td(s[SI.infertileFlag] || "0", t, i, "infertileFlag", "number")}${tds(OPT.hobby, f.hobby, t, i, "hobby")}${tds(OPT.talent, f.talentType, t, i, "talentType")}${td(f.talentVal, t, i, "talentVal", "number")}${tds(OPT.skill, f.skillType, t, i, "skillType")}${del(t, i)}`;
     },
   );
 }

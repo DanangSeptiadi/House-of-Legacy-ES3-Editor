@@ -61,6 +61,10 @@ This fork fixes structural issues with the pipe‑delimited fields (`f4` for mem
 | **Spouse** (`f4`) | **12** fields | Added `parseF4_S`/`buildF4_S` – `partnerId` at pipe[9], `hobby` at pipe[10]. Previously hobby and partnerId shared the same pipe index, causing them to overwrite each other. The trailing `null` is also preserved instead of being truncated. |
 | **Retainer** (`nl`) | 10–11 fields | `buildF4R` now preserves actual values for `gen`, `lifespan`, `unk`, and `hobby` instead of silently overwriting them with hardcoded defaults (`0`, `80`, `1`, `0`). |
 
+### Infertility Flag
+
+Spouse index `[24]` (`infertileFlag`) controls infertility — value `999` marks the spouse as infertile. Previously this field was misidentified as index 25 (`fertility`).
+
 The save format was verified against two different in‑game save files (`GameData.es3` and `GameData error.es3`) to confirm the correct field layout.
 
 ## 📁 File Structure
