@@ -63,8 +63,13 @@ document.addEventListener("change", (e) => {
     f = e.target.dataset.f;
   if (!t || i === undefined || !f || !S) return;
   const src = DEL_KEY[t];
-  if (src && S[src]?.value[+i])
+  if (src && S[src]?.value[+i]) {
     applyField(S[src].value[+i], t, f, e.target.value);
+    if (t === "inv" && f === "0") {
+      const cell = document.querySelector(`.inv-info[data-i="${i}"]`);
+      if (cell) cell.textContent = itemInfo(e.target.value) || "—";
+    }
+  }
 });
 
 // ── Event: delete row ─────────────────────────────────────────────
@@ -214,6 +219,7 @@ document.getElementById("fileInput").onchange = (e) => {
     try {
       S = JSON.parse(ev.target.result);
       fileName = file.name;
+      if (typeof detachLive === "function") detachLive();
       normalizeData();
       setStatus(`Loaded: ${file.name}`);
       renderAll();
@@ -247,14 +253,21 @@ function flushGameData() {
 }
 
 // ── Save ───────────────────────────────────────────────────────────
-function doSave() {
+async function doSave() {
   if (!S) {
     setStatus("No save loaded", false);
     return;
   }
   flushGameData();
   normalizeData();
-  const blob = new Blob([JSON.stringify(S, null, 2)], {
+  const text = JSON.stringify(S, null, 2);
+
+  // Live mode: write straight back to the real save (with a .bak backup).
+  const liveSave =
+    typeof saveToLiveFile === "function" ? await saveToLiveFile(text) : null;
+  if (liveSave) return;
+
+  const blob = new Blob([text], {
     type: "application/json",
   });
   const a = document.createElement("a");
@@ -262,5 +275,5 @@ function doSave() {
   a.download = fileName;
   a.click();
   URL.revokeObjectURL(a.href);
-  setStatus("Saved.");
+  if (liveSave !== false) setStatus("Saved (downloaded).");
 }

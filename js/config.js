@@ -118,6 +118,51 @@ const OPT = {
   gender: { 0: "Female", 1: "Male" },
 };
 
+// ── Known item info ──────────────────────────────────────────────
+// Important/known item IDs → description shown in the Inventory table.
+const ITEM_INFO = {
+  // Food
+  2: "Food · Grain",
+  3: "Food · Vege",
+  4: "Food · Meat",
+  // Gifts
+  156: "Gift · Tiger pelt (pelt)",
+  151: "Gift · Zither (music)",
+  143: "Gift · Amber wine (wine)",
+  135: "Gift · Phoenix vase (vase)",
+  128: "Gift · Golden censer (incense)",
+  120: "Gift · Jade pot (tea set)",
+  96: "Gift · Jade screen (antique)",
+  87: "Gift · Eternal landscape (art)",
+  81: "Gift · Timeless stele (ink)",
+  65: "Gift · Belt hook (jewelry m) +8",
+  61: "Gift · Jade necklace (jewelry f) +11",
+  50: "Gift · Rose dew (rogue)",
+  28: "Gift · Heavenly silk (textiles)",
+  // Weapons
+  103: "Weapon · Repeating crossbow",
+  111: "Weapon · Twinblades",
+  // Others
+  285: "Other · Remove silly (medicine)",
+  75: "Other · Passion pill (pregnancy chance)",
+  71: "Other · Glow pill +10 charisma",
+  167: "Other · Toad venom -100 hp (poison)",
+  162: "Other · Luck +20 (spell)",
+  15: "Other · Bear paw (snack)",
+  72: "Other · Eternal pill",
+  // Misc
+  0: "Misc · Offering",
+  1: "Misc · Manure",
+  67: "Misc · Cotton",
+  74: "Misc · Salt",
+};
+
+const itemInfo = (id) => {
+  const key = String(id ?? "").trim();
+  if (!/^\d+$/.test(key)) return "";
+  return ITEM_INFO[Number(key)] || "";
+};
+
 // ── Field metadata ──────────────────────────────────────────────
 const PIPE_FIELDS = new Set([
   "name",

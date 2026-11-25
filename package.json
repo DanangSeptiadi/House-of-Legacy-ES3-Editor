@@ -1,0 +1,9 @@
+{
+  "name": "house-of-legacy-es3-editor",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Standalone save editor for House of Legacy (GameData.es3)",
+  "scripts": {
+    "start": "node serve.mjs"
+  }
+}

@@ -18,7 +18,7 @@
 | Edit member stats (age, lit, mar, etc.) | ✅ Yes |
 | Edit spouse stats (safe fields only) | ✅ Yes |
 | Edit retainer stats | ✅ Yes |
-| Edit inventory (add/delete items) | ✅ Yes |
+| Edit inventory (add/delete items + item info) | ✅ Yes |
 | Edit horses | ✅ Yes |
 | Auto‑max members, spouses, retainers, horses | ✅ Yes (safe fields only) |
 | Add new retainers | ✅ Yes |
@@ -26,6 +26,7 @@
 | Validate horse owner IDs | ❌ No |
 | Fix existing pregnancy/fertility issues | ❌ No (must edit manually) |
 | Real‑time validation | ❌ No |
+| Auto‑reload from disk / direct save | ✅ Yes (with local server) |
 | Server storage / sharing | ❌ No (static local file only) |
 
 ## 🚀 How to Use
@@ -36,6 +37,59 @@
 4. Edit any field – changes are applied live to the in‑memory data.
 5. Click **💾 Save Archive** to download the modified `GameData.es3`.
 6. Replace your original save file (make a backup first!).
+
+## 🔄 Live Mode — auto-reload from the real save file
+
+Browsers can't read an arbitrary local path on their own. Run the bundled
+zero-dependency server and the editor will load `GameData.es3` automatically,
+watch it for changes, and save directly back to it:
+
+```bash
+node serve.mjs          # or: npm start / make serve
+# → http://127.0.0.1:4173/
+```
+
+The save is auto-detected from the newest slot under:
+
+```
+~/.local/share/Steam/steamapps/compatdata/2503770/pfx/drive_c/users/steamuser/
+  AppData/LocalLow/S3Studio/House of Legacy/FW/*/GameData.es3
+```
+
+Override the path or port when needed:
+
+```bash
+HOL_SAVE="$HOME/path/to/GameData.es3" node serve.mjs
+node serve.mjs --save "/path/to/GameData.es3" --port 4174
+```
+
+Handy `make` targets (run `make` to list them):
+
+```bash
+make serve      # same as node serve.mjs
+make dev        # restart the server when serve.mjs changes
+make save-path  # print the auto-detected GameData.es3 path
+make backup     # timestamped copy of the save
+make check      # syntax-check serve.mjs and js/*.js
+```
+
+In live mode:
+
+- The save loads on page open — no file picker.
+- **Auto-reload** (toolbar checkbox) reloads the tables whenever the game
+  writes the file. Uncheck it to edit without being interrupted, then press
+  **🔄 Reload** when ready.
+- **💾 Save Archive** writes straight to `GameData.es3` (keeping a
+  `GameData.es3.bak` backup). Invalid JSON is rejected before writing.
+- Opening a file manually switches live mode off, so the manual copy is never
+  silently overwritten.
+
+> The server only listens on `127.0.0.1`. On a static host (Vercel/GitHub
+> Pages) it isn't detected, and the normal Open/Save-download workflow still
+> works.
+
+> Tip: return to the game's main menu (or quit) before saving directly, so the
+> running game doesn't overwrite your edits from memory.
 
 ## ⚠️ Important Notes
 

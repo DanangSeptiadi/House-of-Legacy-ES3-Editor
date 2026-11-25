@@ -24,6 +24,13 @@
                 <button class="btn-primary" onclick="doSave()">
                     💾 Save Archive
                 </button>
+                <button id="reloadBtn" class="hidden" onclick="reloadFromFile()">
+                    🔄 Reload
+                </button>
+                <label class="watch hidden" id="watchWrap">
+                    <input type="checkbox" id="autoReload" checked />
+                    Auto-reload
+                </label>
                 <button class="btn-danger" onclick="location.reload()">
                     ⟳ Reset
                 </button>
@@ -40,5 +47,6 @@
         <script src="js/utils.js"></script>
         <script src="js/rendering.js"></script>
         <script src="js/editor.js"></script>
+        <script src="js/live.js"></script>
     </body>
 </html>
